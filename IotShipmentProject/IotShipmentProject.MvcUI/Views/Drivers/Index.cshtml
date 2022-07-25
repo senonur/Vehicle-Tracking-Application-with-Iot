@@ -1,0 +1,137 @@
+﻿@using IotShipmentProject.Entity.Concrete
+@using IotShipmentProject.Core.Entity.Concrete
+@model IEnumerable<Driver>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-section">
+    <div class="container-liquid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="sec-box">
+                    <a class="closethis"></a>
+                    <header>
+                        <h2 class="heading">Şoför Yönetimi</h2>
+                    </header>
+                    <div class="contents">
+                        <a class="togglethis"></a>
+                        <div class="table-box">
+                            <script type="text/javascript" src="~/Content/dashboard/assets/js/jquery.dataTables.min.js"></script>
+                            <div id="example_wrapper" class="dataTables_wrapper" role="grid">
+                                <table class="display table dataTable" id="example" aria-describedby="example_info">
+                                    <thead>
+                                        <tr role="row">
+                                            <th class="center sorting_asc" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending">Şoför Numarası</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Ad</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Soyad</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Kimlik Numarası</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Ehliyet Numarası</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Ehliyet Türü</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Durumu</th>
+                                            <th class="center" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_number" value="Numara Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_name" value="Ada Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_surname" value="Soyada Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_identityNumber" value="Kimlik Numarasına Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_licenseNumber" value="Ehliyete Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_licenseType" value="Ehliyet Türüne Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_status" value="Duruma Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <a class="btn btn-info style2" href="/Drivers/Create">
+                                                    <i class="glyphicon glyphicon-plus"></i> Yeni Ekle
+                                                </a>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody role="alert" aria-live="polite" aria-relevant="all">
+                                        @{ int index = 1; }
+                                        @foreach (Driver driver in Model)
+                                        {
+                                            string trClass = index % 2 == 0 ? "even" : "odd";
+                                            string status = driver.Status == Status.Active ? "Aktif" : "Pasif";
+
+                                            <tr class="gradeA @trClass">
+                                                <td class="sorting_1 center">@index</td>
+                                                <td class="center">@driver.Name</td>
+                                                <td class="center">@driver.SurName</td>
+                                                <td class="center">@driver.IdentityNumber</td>
+                                                <td class="center">@driver.DrivingLicenceNumber</td>
+                                                <td class="center">@driver.DrivingLicenceType</td>
+                                                <td class="center">@status</td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle style3" type="button">İşlemler <span class="caret"></span></button>
+                                                        <ul role="menu" class="dropdown-menu">
+                                                            <li>@Html.ActionLink("Düzenle", "Edit", new { id = driver.Id }, new { style = "font-weight: bold" })</li>
+                                                            <li>@Html.ActionLink($"Durumu Değiştir ({(driver.Status == Status.Active ? "Aktif" : "Pasif")})", "ChangeStatus", new { id = driver.Id }, new { style = "font-weight: bold" })</li>
+                                                            <li>@Html.ActionLink("Sil", "Delete", new { id = driver.Id }, new { style = "font-weight: bold" })</li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            index++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <script>
+                                var asInitVals = new Array();
+                                $(document).ready(function () {
+                                    var oTable = $('#example').dataTable({
+                                        "oLanguage": {
+                                            "sSearch": "Tabloda ara:"
+                                        }
+                                    });
+
+                                    $("tfoot input").keyup(function () {
+                                        oTable.fnFilter(this.value, $("tfoot input").index(this));
+                                    });
+
+                                    $("tfoot input").each(function (i) {
+                                        asInitVals[i] = this.value;
+                                    });
+
+                                    $("tfoot input").focus(function () {
+                                        if (this.className == "search_init") {
+                                            this.className = "";
+                                            this.value = "";
+                                        }
+                                    });
+
+                                    $("tfoot input").blur(function (i) {
+                                        if (this.value == "") {
+                                            this.className = "search_init";
+                                            this.value = asInitVals[$("tfoot input").index(this)];
+                                        }
+                                    });
+                                });
+                            </script>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

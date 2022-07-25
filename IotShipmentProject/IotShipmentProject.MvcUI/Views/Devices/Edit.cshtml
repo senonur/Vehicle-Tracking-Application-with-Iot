@@ -1,0 +1,82 @@
+﻿@using IotShipmentProject.Entity.Concrete
+@model Device
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-section">
+    <div class="container-liquid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="sec-box">
+                    <a class="closethis"></a>
+                    <header>
+                        <h2 class="heading">Cihaz Düzenleme Formu</h2>
+                    </header>
+                    <div class="contents">
+                        <a class="togglethis"></a>
+                        <div class="table-box">
+                            <form name="editDeviceForm" action="/Devices/Edit" method="post" onsubmit="return ValidateEditDeviceForm()">
+                                <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-md-4">Açıklama</th>
+                                            <th class="col-md-8">Değer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="col-md-4">Cihaz Adı</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Seri Numarası</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.SerialNumber, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">İşlemler</td>
+                                            <td class="col-md-8">
+                                                <div>
+                                                    @Html.EditorFor(model => model.CreatedDate, new { htmlAttributes = new { type = "hidden" } })
+                                                    @Html.EditorFor(model => model.CreatedUserName, new { htmlAttributes = new { type = "hidden" } })
+                                                    @Html.EditorFor(model => model.CreatedComputerName, new { htmlAttributes = new { type = "hidden" } })
+                                                    @Html.EditorFor(model => model.Status, new { htmlAttributes = new { type = "hidden" } })
+                                                    <input type="submit" value="Güncelle" class="btn btn-success style2" style="margin-right: 10px; width: 200px;" />
+                                                    @Html.ActionLink("Geri Dön", "Index", null, new { @class = "btn btn-info style2", style = "width: 200px" })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function ValidateEditDeviceForm()
+    {
+        var name = document.editDeviceForm[1].value;
+        var serialNumber = document.editDeviceForm[2].value;
+
+        if (name == null || name == "" || serialNumber == null || serialNumber == "") {
+            alertify.error("Bilgiler boş bırakılamaz.");
+            return false;
+        }
+    }
+</script>

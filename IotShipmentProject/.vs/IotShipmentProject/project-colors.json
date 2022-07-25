@@ -1,0 +1,21 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "bef3ba0a-16f9-415f-b687-e85200423be3": {
+      "ProjectGuid": "bef3ba0a-16f9-415f-b687-e85200423be3",
+      "DisplayName": "IotShipmentProject.MvcUI",
+      "ColorIndex": 0
+    },
+    "df64033d-d570-4c48-ac3a-a1536a20d652": {
+      "ProjectGuid": "df64033d-d570-4c48-ac3a-a1536a20d652",
+      "DisplayName": "IotShipmentProject.Core",
+      "ColorIndex": 1
+    },
+    "46b9b7e7-94af-47e3-bad8-9a37f0fc7b58": {
+      "ProjectGuid": "46b9b7e7-94af-47e3-bad8-9a37f0fc7b58",
+      "DisplayName": "IotShipmentProject.DataAccess",
+      "ColorIndex": 2
+    }
+  },
+  "NextColorIndex": 3
+}

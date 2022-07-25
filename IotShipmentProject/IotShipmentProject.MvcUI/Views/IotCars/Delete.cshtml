@@ -1,0 +1,81 @@
+﻿@using IotShipmentProject.Entity.Concrete
+@model IotCar
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-section">
+    <div class="container-liquid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="sec-box">
+                    <a class="closethis"></a>
+                    <header>
+                        <h2 class="heading">Silme İşlemini Onayla</h2>
+                    </header>
+                    <div class="contents">
+                        <a class="togglethis"></a>
+                        <div class="table-box">
+                            <form action="/IotCars/Delete" method="post">
+                                <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-md-4">Açıklama</th>
+                                            <th class="col-md-8">Değer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="col-md-4">Ad - Marka</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.Brand, new { htmlAttributes = new { @class = "form-control", disabled = "disabled" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Üretim Yılı</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.Model, new { htmlAttributes = new { @class = "form-control", disabled = "disabled" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Aylık Maksimum Ücret</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.PlateNumber, new { htmlAttributes = new { @class = "form-control", disabled = "disabled" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Nakit Teşviği</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.VehicleType, new { htmlAttributes = new { @class = "form-control", disabled = "disabled" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">İşlemler</td>
+                                            <td class="col-md-8">
+                                                <div>
+                                                    <input type="submit" value="Sil" class="btn btn-danger style2" style="margin-right: 10px; width: 200px;" />
+                                                    @Html.ActionLink("Geri Dön", "Index", null, new { @class = "btn btn-info style2", style = "width: 200px" })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

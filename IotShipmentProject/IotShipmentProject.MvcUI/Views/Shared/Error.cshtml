@@ -1,0 +1,12 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string goBackLink = ViewBag.GoBackLink;
+}
+
+<div class="content-section">
+    <div class="fourofour">
+        <h1>404</h1>
+        <h1>@ViewBag.PanelErrorMessage</h1>
+        <a href="@goBackLink" class="btn btn-primary"><i class="glyphicon glyphicon-home">&nbsp;</i>Geri Dön</a>
+    </div>
+</div>

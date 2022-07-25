@@ -1,0 +1,146 @@
+﻿@using IotShipmentProject.Entity.Concrete
+@using IotShipmentProject.MvcUI.Models.ViewModels
+@model ShipmentModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-section">
+    <div class="container-liquid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="sec-box">
+                    <a class="closethis"></a>
+                    <header>
+                        <h2 class="heading">Sevkiyat Düzenleme Formu</h2>
+                    </header>
+                    <div class="contents">
+                        <a class="togglethis"></a>
+                        <div class="table-box">
+                            <form name="editShipmentForm" action="/Shipments/Edit" method="post" onsubmit="return ValidateEditShipmentForm()">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-md-4">Açıklama</th>
+                                            <th class="col-md-8">Değer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="col-md-4">Araç</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    <select class="form-control" name="IotCarId" id="IotCarId">
+                                                        <option selected="selected" value="@Model.IotCars.FirstOrDefault(i => i.Id == Model.Shipment.IotCarId).Id">@Model.IotCars.FirstOrDefault(i => i.Id == Model.Shipment.IotCarId).Brand</option>
+                                                        @foreach (IotCar iotCar in Model.IotCars.Where(i => i.Id != Model.Shipment.IotCarId))
+                                                        {
+                                                            <option value="@iotCar.Id">@iotCar.Brand</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Şoför</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    <select class="form-control" name="DriverId" id="DriverId">
+                                                        <option selected="selected" value="@Model.Drivers.FirstOrDefault(d => d.Id == Model.Shipment.DriverId).Id">@Model.Drivers.FirstOrDefault(d => d.Id == Model.Shipment.DriverId).Name</option>
+                                                        @foreach (Driver driver in Model.Drivers.Where(d => d.Id != Model.Shipment.DriverId))
+                                                        {
+                                                            <option value="@driver.Id">@driver.Name</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Başlangıç Noktası</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.Shipment.StartPoint, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Bitiş Noktası</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.Shipment.EndPoint, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Taşınacak Ürün</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.Shipment.Product, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Sevkiyat Durumu</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    <select class="form-control" name="Shipment.ShipmentState" id="Shipment_ShipmentState">
+                                                        @foreach (ShipmentState state in Model.ShipmentStates)
+                                                        {
+                                                            string shipmentState = string.Empty;
+
+                                                            switch (state)
+                                                            {
+                                                                case ShipmentState.Completed: shipmentState = "Tamamlanmış"; break;
+                                                                case ShipmentState.Active: shipmentState = "Aktif"; break;
+                                                                case ShipmentState.Preparing: shipmentState = "Hazırlanıyor"; break;
+                                                                case ShipmentState.Waiting: shipmentState = "Bekliyor"; break;
+                                                            }
+
+                                                            <option value="@state">@shipmentState</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">İşlemler</td>
+                                            <td class="col-md-8">
+                                                <div>
+                                                    @Html.EditorFor(model => model.Shipment.CreatedDate, new { htmlAttributes = new { type = "hidden" } })
+                                                    @Html.EditorFor(model => model.Shipment.CreatedUserName, new { htmlAttributes = new { type = "hidden" } })
+                                                    @Html.EditorFor(model => model.Shipment.CreatedComputerName, new { htmlAttributes = new { type = "hidden" } })
+                                                    @Html.EditorFor(model => model.Shipment.Status, new { htmlAttributes = new { type = "hidden" } })
+                                                    @Html.EditorFor(model => model.Shipment.Id, new { htmlAttributes = new { type = "hidden" } })
+                                                    @Html.EditorFor(model => model.Shipment.ShipmentNumber, new { htmlAttributes = new { type = "hidden" } })
+                                                    <input type="submit" value="Güncelle" class="btn btn-success style2" style="margin-right: 10px; width: 200px;" />
+                                                    @Html.ActionLink("Geri Dön", "Index", null, new { @class = "btn btn-info style2", style = "width: 200px" })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function ValidateEditShipmentForm() {
+        var iotCar = document.getElementById('IotCarId').value;
+        var driver = document.getElementById('DriverId').value;
+        var shipmentState = document.getElementById('Shipment_ShipmentState').value;
+        var startPoint = document.getElementById('Shipment_StartPoint').value;
+        var endPoint = document.getElementById('Shipment_EndPoint').value;
+        var product = document.getElementById('Shipment_Product').value;
+
+        if (iotCar == null || iotCar == "" || driver == null || driver == "" || shipmentState == null || shipmentState == "" || startPoint == null || startPoint == "" || endPoint == null || endPoint == "" || product == null || product == "") {
+            alertify.error("Bilgiler boş bırakılamaz.");
+            return false;
+        }
+    }
+</script>

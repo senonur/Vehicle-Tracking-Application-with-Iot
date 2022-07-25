@@ -1,0 +1,485 @@
+﻿@using IotShipmentProject.Entity.Concrete
+@using IotShipmentProject.Core.Entity.Concrete
+@using IotShipmentProject.MvcUI.Models.ViewModels
+@model DashboardModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    var position, marker, result, dirroad;
+
+    function initMap()
+    {
+        var iotCars = @Html.Raw(Json.Encode(Model.IotCars));
+        var drivers = @Html.Raw(Json.Encode(Model.Drivers));
+        var shipments = @Html.Raw(Json.Encode(Model.Shipments.Where(s => s.ShipmentState == ShipmentState.Active)));
+
+        const map = new google.maps.Map(document.getElementById("map"),
+        {
+            zoom: 3,
+            center: { lat: -24.345, lng: 134.46 },
+        });
+
+        const directionsService = new google.maps.DirectionsService();
+        geocoder = new google.maps.Geocoder();
+
+        function renderDirections(result)
+        {
+            const directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+            directionsRenderer.setDirections(result);
+        }
+
+        function requestDirections(start, end)
+        {
+            directionsService.route({
+                origin: start,
+                destination: end,
+                travelMode: google.maps.DirectionsTravelMode.DRIVING,
+            },
+            function (result) {
+                renderDirections(result);
+            })
+        }
+
+        var markers = [];
+
+        shipments.forEach(item =>
+        {
+            requestDirections(item.StartPoint, item.EndPoint);
+
+            var vehicle = iotCars.find(x => x.Id === item.IotCarId);
+            var driver = drivers.find(x => x.Id === item.DriverId);
+
+            geocoder.geocode({ 'address': item.StartPoint },
+                function (result)
+                {
+                    lat = String(result[0].geometry.location.lat());
+                    lng = String(result[0].geometry.location.lng());
+                    addMarker({ coords: { lat: Number(lat), lng: Number(lng) }, iconImage: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png', content: "<h5>Sevkiyat Numarası :" + item.ShipmentNumber + "</h5>,<h6>Araç Numarası :" + vehicle.PlateNumber + "<h6>,<h6>Şoför :" + driver.Name + " " + driver.Surname + "<h6>,<h6>Taşınan Ürün :" + item.Product + "<h6>", map: map });
+                }
+            );
+        });
+
+        function addMarker(props)
+        {
+            var marker = new google.maps.Marker(
+            {
+                position: props.coords,
+                map: map,
+                icon: props.iconImage,
+                zIndex: 100
+            });
+
+            if (props.iconImage)
+            {
+                marker.setIcon(props.iconImage);
+            }
+
+            if (props.content)
+            {
+                const infoWindow = new google.maps.InfoWindow(
+                {
+                    content: "",
+                    disableAutoPan: true,
+                });
+
+                marker.addListener("click", function ()
+                {
+                    infoWindow.setContent(props.content)
+                    infoWindow.open(map, marker);
+                });
+            }
+        }
+    }
+</script>
+
+<div class="content-section">
+    <div class="container-liquid">
+        <div class="row">
+
+            <div class="statistics">
+                <div class="col-xs-2">
+                    <div class="stat-box colorone">
+                        <i class="author">&nbsp;</i>
+                        <h4><a href="~/IotCars/Index" style="color: #ffffff">IOT Araç Sayısı</a></h4>
+                        <h1>@Model.IotCarCount</h1>
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="stat-box colortwo">
+                        <i class="chart">&nbsp;</i>
+                        <h4><a href="~/Drivers/Index" style="color: #ffffff">Şoför Sayısı</a></h4>
+                        <h1>@Model.DriverCount</h1>
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="stat-box colorthree">
+                        <i class="pages">&nbsp;</i>
+                        <h4>Aktif Sevkiyatlar</h4>
+                        <h1>@Model.ActiveShipmentCount</h1>
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="stat-box colorfour">
+                        <i class="users">&nbsp;</i>
+                        <h4>Tamamlanan Sevkiyatlar</h4>
+                        <h1>@Model.CompletedShipmentCount</h1>
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="stat-box colorfive">
+                        <i class="downloads">&nbsp;</i>
+                        <h4>Bekleyen Sevkiyatlar</h4>
+                        <h1>@Model.WaitingShipmentCount</h1>
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="stat-box colorsix">
+                        <i class="comments">&nbsp;</i>
+                        <h4 style="color: #000000">Hazırlanan Sevkiyatlar</h4>
+                        <h1>@Model.PreparingShipmentCount</h1>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="card">
+                            <div class="card-header border-0 align-items-center d-flex">
+                                <h4 class="card-title mb-0 flex-grow-1">Sevkiyatlar</h4>
+                            </div>
+                            <div class="card-body p-0 pb-2" id="map" style="height: 400px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="sec-box">
+                        <a class="closethis"></a>
+                        <header>
+                            <h2 class="heading">Sevkiyatlar</h2>
+                        </header>
+                        <div class="contents">
+                            <a class="togglethis"></a>
+                            <div class="table-box">
+                                <script type="text/javascript" src="~/Content/dashboard/assets/js/jquery.dataTables.min.js"></script>
+                                <div id="example_wrapper" class="dataTables_wrapper" role="grid">
+                                    <table class="display table dataTable" id="example" aria-describedby="example_info">
+                                        <thead>
+                                            <tr role="row">
+                                                <th class="center sorting_asc" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending">Sevkiyat Numarası</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Araç</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Şoför</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Taşınan Ürün</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Başlangıç Noktası</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Bitiş Noktası</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Sevkiyat Durumu</th>
+                                                <th class="center" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_shipmentNumber" value="Numara Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_iotCar" value="Araca Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_driver" value="Şoföre Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_product" value="Taşınan Ürüne Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_startPoint" value="Başlangıç Noktasına Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_endPoint" value="Bitiş Noktasına Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_shipmentState" value="Sevkiyat Durumuna Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <a class="btn btn-info style2" href="/Shipments/Create">
+                                                        <i class="glyphicon glyphicon-plus"></i> Yeni Ekle
+                                                    </a>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                        <tbody role="alert" aria-live="polite" aria-relevant="all">
+                                            @{ int shipmentIndex = 1; }
+                                            @foreach (Shipment shipment in Model.Shipments)
+                                            {
+                                                string trClass = shipmentIndex % 2 == 0 ? "even" : "odd";
+                                                string shipmentStatus = string.Empty;
+                                                ShipmentState shipmentState = shipment.ShipmentState;
+
+                                                switch (shipmentState)
+                                                {
+                                                    case ShipmentState.Completed: shipmentStatus = "Tamamlanmış"; break;
+                                                    case ShipmentState.Active: shipmentStatus = "Aktif"; break;
+                                                    case ShipmentState.Preparing: shipmentStatus = "Hazırlanıyor"; break;
+                                                    case ShipmentState.Waiting: shipmentStatus = "Bekliyor"; break;
+                                                }
+
+                                                <tr class="gradeA @trClass">
+                                                    <td class="center">@shipment.ShipmentNumber</td>
+                                                    <td class="center">@Model.IotCars.Find(i => i.Id == shipment.IotCarId).Brand</td>
+                                                    <td class="center">@Model.Drivers.Find(d => d.Id == shipment.DriverId).Name</td>
+                                                    <td class="center">@shipment.Product</td>
+                                                    <td class="center">@shipment.StartPoint</td>
+                                                    <td class="center">@shipment.EndPoint</td>
+                                                    <td class="center">@shipmentStatus</td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle style3" type="button">İşlemler <span class="caret"></span></button>
+                                                            <ul role="menu" class="dropdown-menu">
+                                                                <li>@Html.ActionLink("Düzenle", "Edit", "Shipments", new { id = shipment.Id }, new { style = "font-weight: bold" })</li>
+                                                                <li>@Html.ActionLink("Sil", "Delete", "Shipments", new { id = shipment.Id }, new { style = "font-weight: bold" })</li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                shipmentIndex++;
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="sec-box">
+                        <a class="closethis"></a>
+                        <header>
+                            <h2 class="heading">IOT Araçlar</h2>
+                        </header>
+                        <div class="contents">
+                            <a class="togglethis"></a>
+                            <div class="table-box">
+                                <script type="text/javascript" src="~/Content/dashboard/assets/js/jquery.dataTables.min.js"></script>
+                                <div id="example_wrapper" class="dataTables_wrapper" role="grid">
+                                    <table class="display table dataTable" id="example" aria-describedby="example_info">
+                                        <thead>
+                                            <tr role="row">
+                                                <th class="center sorting_asc" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending">Araç Numarası</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Marka</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Model</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Plaka</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Araç Tipi</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Durum</th>
+                                                <th class="center" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_number" value="Numara Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_brand" value="Marka Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_model" value="Model Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_plate" value="Plakaya Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_type" value="Araç Tipine Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_status" value="Duruma Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <a class="btn btn-info style2" href="/IotCars/Create">
+                                                        <i class="glyphicon glyphicon-plus"></i> Yeni Ekle
+                                                    </a>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                        <tbody role="alert" aria-live="polite" aria-relevant="all">
+                                            @{ int iotIndex = 1; }
+                                            @foreach (IotCar car in Model.IotCars)
+                                            {
+                                                string trClass = iotIndex % 2 == 0 ? "even" : "odd";
+                                                string status = car.Status == Status.Active ? "Aktif" : "Pasif";
+
+                                                <tr class="gradeA @trClass">
+                                                    <td class="sorting_1 center">@iotIndex</td>
+                                                    <td class="center">@car.Brand</td>
+                                                    <td class="center">@car.Model</td>
+                                                    <td class="center">@car.PlateNumber</td>
+                                                    <td class="center">@car.VehicleType</td>
+                                                    <td class="center">@status</td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle style3" type="button">İşlemler <span class="caret"></span></button>
+                                                            <ul role="menu" class="dropdown-menu">
+                                                                <li>@Html.ActionLink("Düzenle", "Edit", "IotCars", new { id = car.Id }, new { style = "font-weight: bold" })</li>
+                                                                <li>@Html.ActionLink($"Durumu Değiştir ({(car.Status == Status.Active ? "Aktif" : "Pasif")})", "ChangeStatus", "IotCars", new { id = car.Id }, new { style = "font-weight: bold" })</li>
+                                                                <li>@Html.ActionLink("Sil", "Delete", "IotCars", new { id = car.Id }, new { style = "font-weight: bold" })</li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                iotIndex++;
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="sec-box">
+                        <a class="closethis"></a>
+                        <header>
+                            <h2 class="heading">Şoförler</h2>
+                        </header>
+                        <div class="contents">
+                            <a class="togglethis"></a>
+                            <div class="table-box">
+                                <script type="text/javascript" src="~/Content/dashboard/assets/js/jquery.dataTables.min.js"></script>
+                                <div id="example_wrapper" class="dataTables_wrapper" role="grid">
+                                    <table class="display table dataTable" id="example" aria-describedby="example_info">
+                                        <thead>
+                                            <tr role="row">
+                                                <th class="center sorting_asc" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending">Şoför Numarası</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Ad</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Soyad</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Kimlik Numarası</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Ehliyet Numarası</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Ehliyet Türü</th>
+                                                <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Durumu</th>
+                                                <th class="center" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_number" value="Numara Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_name" value="Ada Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_surname" value="Soyada Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_identityNumber" value="Kimlik Numarasına Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_licenseNumber" value="Ehliyete Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_licenseType" value="Ehliyet Türüne Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <input type="text" name="search_status" value="Duruma Göre Ara" class="search_init">
+                                                </th>
+                                                <th rowspan="1" colspan="1">
+                                                    <a class="btn btn-info style2" href="/Drivers/Create">
+                                                        <i class="glyphicon glyphicon-plus"></i> Yeni Ekle
+                                                    </a>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                        <tbody role="alert" aria-live="polite" aria-relevant="all">
+                                            @{ int driverIndex = 1; }
+                                            @foreach (Driver driver in Model.Drivers)
+                                            {
+                                                string trClass = driverIndex % 2 == 0 ? "even" : "odd";
+                                                string status = driver.Status == Status.Active ? "Aktif" : "Pasif";
+
+                                                <tr class="gradeA @trClass">
+                                                    <td class="sorting_1 center">@driverIndex</td>
+                                                    <td class="center">@driver.Name</td>
+                                                    <td class="center">@driver.SurName</td>
+                                                    <td class="center">@driver.IdentityNumber</td>
+                                                    <td class="center">@driver.DrivingLicenceNumber</td>
+                                                    <td class="center">@driver.DrivingLicenceType</td>
+                                                    <td class="center">@status</td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle style3" type="button">İşlemler <span class="caret"></span></button>
+                                                            <ul role="menu" class="dropdown-menu">
+                                                                <li>@Html.ActionLink("Düzenle", "Edit", "Drivers", new { id = driver.Id }, new { style = "font-weight: bold" })</li>
+                                                                <li>@Html.ActionLink($"Durumu Değiştir ({(driver.Status == Status.Active ? "Aktif" : "Pasif")})", "ChangeStatus", "Drivers", new { id = driver.Id }, new { style = "font-weight: bold" })</li>
+                                                                <li>@Html.ActionLink("Sil", "Delete", "Drivers", new { id = driver.Id }, new { style = "font-weight: bold" })</li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                driverIndex++;
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                var asInitVals = new Array();
+                $(document).ready(function () {
+                    var oTable = $('#example').dataTable({
+                        "oLanguage": {
+                            "sSearch": "Tabloda ara:"
+                        }
+                    });
+
+                    $("tfoot input").keyup(function () {
+                        oTable.fnFilter(this.value, $("tfoot input").index(this));
+                    });
+
+                    $("tfoot input").each(function (i) {
+                        asInitVals[i] = this.value;
+                    });
+
+                    $("tfoot input").focus(function () {
+                        if (this.className == "search_init") {
+                            this.className = "";
+                            this.value = "";
+                        }
+                    });
+
+                    $("tfoot input").blur(function (i) {
+                        if (this.value == "") {
+                            this.className = "search_init";
+                            this.value = asInitVals[$("tfoot input").index(this)];
+                        }
+                    });
+                });
+            </script>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjKgs96YAzH6GszkhE-ZUHM9ryon2ZE3g&libraries=places&callback=initMap&v=weekly" async></script>
+<script src='https://apis.google.com/js/api.js' type="text/javascript"></script>

@@ -1,0 +1,145 @@
+﻿@using IotShipmentProject.Entity.Concrete
+@using IotShipmentProject.MvcUI.Models.ViewModels
+@model ShipmentIndexModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-section">
+    <div class="container-liquid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="sec-box">
+                    <a class="closethis"></a>
+                    <header>
+                        <h2 class="heading">Sevkiyat Yönetimi</h2>
+                    </header>
+                    <div class="contents">
+                        <a class="togglethis"></a>
+                        <div class="table-box">
+                            <script type="text/javascript" src="~/Content/dashboard/assets/js/jquery.dataTables.min.js"></script>
+                            <div id="example_wrapper" class="dataTables_wrapper" role="grid">
+                                <table class="display table dataTable" id="example" aria-describedby="example_info">
+                                    <thead>
+                                        <tr role="row">
+                                            <th class="center sorting_asc" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending">Sevkiyat Numarası</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Araç</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Şoför</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Taşınan Ürün</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Başlangıç Noktası</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 266px;">Bitiş Noktası</th>
+                                            <th class="center sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">Sevkiyat Durumu</th>
+                                            <th class="center" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 267px;">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_shipmentNumber" value="Numara Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_iotCar" value="Araca Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_driver" value="Şoföre Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_product" value="Taşınan Ürüne Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_startPoint" value="Başlangıç Noktasına Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_endPoint" value="Bitiş Noktasına Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <input type="text" name="search_shipmentState" value="Sevkiyat Durumuna Göre Ara" class="search_init">
+                                            </th>
+                                            <th rowspan="1" colspan="1">
+                                                <a class="btn btn-info style2" href="/Shipments/Create">
+                                                    <i class="glyphicon glyphicon-plus"></i> Yeni Ekle
+                                                </a>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody role="alert" aria-live="polite" aria-relevant="all">
+                                        @{ int index = 1; }
+                                        @foreach (Shipment shipment in Model.Shipments)
+                                        {
+                                            string trClass = index % 2 == 0 ? "even" : "odd";
+                                            string shipmentStatus = string.Empty;
+                                            ShipmentState shipmentState = shipment.ShipmentState;
+
+                                            switch (shipmentState)
+                                            {
+                                                case ShipmentState.Completed: shipmentStatus = "Tamamlanmış"; break;
+                                                case ShipmentState.Active: shipmentStatus = "Aktif"; break;
+                                                case ShipmentState.Preparing: shipmentStatus = "Hazırlanıyor"; break;
+                                                case ShipmentState.Waiting: shipmentStatus = "Bekliyor"; break;
+                                            }
+
+                                            <tr class="gradeA @trClass">
+                                                <td class="center">@shipment.ShipmentNumber</td>
+                                                <td class="center">@Model.IotCars.Find(i => i.Id == shipment.IotCarId).Brand</td>
+                                                <td class="center">@Model.Drivers.Find(d => d.Id == shipment.DriverId).Name</td>
+                                                <td class="center">@shipment.Product</td>
+                                                <td class="center">@shipment.StartPoint</td>
+                                                <td class="center">@shipment.EndPoint</td>
+                                                <td class="center">@shipmentStatus</td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle style3" type="button">İşlemler <span class="caret"></span></button>
+                                                        <ul role="menu" class="dropdown-menu">
+                                                            <li>@Html.ActionLink("Düzenle", "Edit", new { id = shipment.Id }, new { style = "font-weight: bold" })</li>
+                                                            <li>@Html.ActionLink("Sil", "Delete", new { id = shipment.Id }, new { style = "font-weight: bold" })</li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            index++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <script>
+                                var asInitVals = new Array();
+                                $(document).ready(function () {
+                                    var oTable = $('#example').dataTable({
+                                        "oLanguage": {
+                                            "sSearch": "Tabloda ara:"
+                                        }
+                                    });
+
+                                    $("tfoot input").keyup(function () {
+                                        oTable.fnFilter(this.value, $("tfoot input").index(this));
+                                    });
+
+                                    $("tfoot input").each(function (i) {
+                                        asInitVals[i] = this.value;
+                                    });
+
+                                    $("tfoot input").focus(function () {
+                                        if (this.className == "search_init") {
+                                            this.className = "";
+                                            this.value = "";
+                                        }
+                                    });
+
+                                    $("tfoot input").blur(function (i) {
+                                        if (this.value == "") {
+                                            this.className = "search_init";
+                                            this.value = asInitVals[$("tfoot input").index(this)];
+                                        }
+                                    });
+                                });
+                            </script>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

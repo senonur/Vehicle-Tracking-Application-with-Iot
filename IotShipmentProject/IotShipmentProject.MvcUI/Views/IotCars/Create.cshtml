@@ -1,0 +1,108 @@
+﻿@using IotShipmentProject.Entity.Concrete
+@using IotShipmentProject.MvcUI.Models.ViewModels
+@model IotCarsModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-section">
+    <div class="container-liquid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="sec-box">
+                    <a class="closethis"></a>
+                    <header>
+                        <h2 class="heading">IOT Araç Ekleme Formu</h2>
+                    </header>
+                    <div class="contents">
+                        <a class="togglethis"></a>
+                        <div class="table-box">
+                            <form name="addIotCarForm" action="/IotCars/Create" method="post" onsubmit="return ValidateAddIotCarForm()">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-md-4">Açıklama</th>
+                                            <th class="col-md-8">Değer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="col-md-4">Ad - Marka</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.IotCar.Brand, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Model</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.IotCar.Model, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Plaka Numarası</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.IotCar.PlateNumber, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">Araç Tipi</td>
+                                            <td class="col-md-8">
+                                                <div class="form-group has-success">
+                                                    @Html.EditorFor(model => model.IotCar.VehicleType, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cihaz</td>
+                                            <td>
+                                                <select class="form-control" name="DeviceId" id="DeviceId">
+                                                    @foreach (Device device in Model.Devices)
+                                                    {
+                                                        <option value="@device.Id">@device.Name</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-md-4">İşlemler</td>
+                                            <td class="col-md-8">
+                                                <div>
+                                                    <input type="submit" value="Ekle" class="btn btn-success style2" style="margin-right: 10px; width: 200px;" />
+                                                    @Html.ActionLink("Geri Dön", "Index", null, new { @class = "btn btn-info style2", style = "width: 200px" })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function ValidateAddIotCarForm()
+    {
+        var brand = document.addIotCarForm[0].value;
+        var model = document.addIotCarForm[1].value;
+        var plateNumber = document.addIotCarForm[2].value;
+        var vehicleType = document.addIotCarForm[3].value;
+
+        if (brand == null || brand == "" || model == null || model == "" || plateNumber == null || plateNumber == "" || vehicleType == null || vehicleType == "")
+        {
+            alertify.error("Bilgiler boş bırakılamaz.");
+            return false;
+        }
+    }
+</script>
